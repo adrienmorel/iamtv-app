@@ -17,26 +17,26 @@ export default {
       },
     ],
   },
-  /*
-   ** Global CSS
-   */
-  css: [
-    "uikit/dist/css/uikit.min.css",
-    "uikit/dist/css/uikit.css",
-    "@assets/css/main.css",
-  ],
-  plugins: [{ src: "~/plugins/uikit.js", ssr: false }],
-  modules: ["@nuxtjs/markdownit", "@nuxtjs/strapi"],
-  strapi: {
-    url: strapiBaseUri,
-    entities: [
-      {
-        name: "articles",
-        type: "collection",
-      },
-      {
-        name: "categories",
-        type: "collection",
+    /*
+     ** Global CSS
+     */
+    css: [
+        "uikit/dist/css/uikit.min.css",
+        "uikit/dist/css/uikit.css",
+        "@assets/css/main.css",
+    ],
+    plugins: [{src: "~/plugins/uikit.js", ssr: false}],
+    modules: ["@nuxtjs/markdownit", "@nuxtjs/strapi", "@nuxtjs/axios"],
+    strapi: {
+        url: strapiBaseUri,
+        entities: [
+            {
+                name: "articles",
+                type: "collection",
+            },
+            {
+                name: "categories",
+                type: "collection",
       },
       {
         name: "homepage",

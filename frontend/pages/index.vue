@@ -11,14 +11,33 @@
 
 <script>
 import Articles from "../components/Articles";
-import { getMetaTags } from "../utils/seo";
-import { getStrapiMedia } from "../utils/medias";
+import {getMetaTags} from "../utils/seo";
+import {getStrapiMedia} from "../utils/medias";
+import Qs from "qs";
+
 
 export default {
   components: {
     Articles,
   },
-  async asyncData({ $strapi }) {
+  async asyncData({$strapi, $axios}) {
+    const query = Qs.stringify({
+      populate: {
+        author: {
+          populate: ["company"],
+        },
+      },
+    }, {
+      encodeValuesOnly: true,
+    });
+
+
+    let baseUrl = "http://localhost:1337/api";
+
+    let articles = await $axios.get("http://localhost:1337/api/articles").data.data;
+
+    console.log("response : ", response.data);
+
     return {
       articles: await $strapi.find("articles"),
       homepage: await $strapi.find("homepage"),
@@ -26,8 +45,8 @@ export default {
     };
   },
   head() {
-    const { seo } = this.homepage;
-    const { defaultSeo, favicon, siteName } = this.global;
+    const {seo} = this.homepage;
+    const {defaultSeo, favicon, siteName} = this.global;
 
     // Merge default and article-specific SEO data
     const fullSeo = {
