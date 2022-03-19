@@ -1,26 +1,26 @@
 <template>
   <div>
     <div
-      v-if="article.image"
-      id="banner"
-      class="uk-height-small uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light uk-padding"
-      :data-src="getStrapiMedia(article.image.url)"
-      uk-img
+        v-if="article.attributes.image"
+        id="banner"
+        class="uk-height-small uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light uk-padding"
+        :data-src="getStrapiMedia(article.attributes.image.data.attributes.url)"
+        uk-img
     >
-      <h1>{{ article.title }}</h1>
+      <h1>{{ article.attributes.title }}</h1>
     </div>
 
     <div class="uk-section">
       <div class="uk-container uk-container-small">
         <!-- eslint-disable vue/no-v-html -->
         <div
-          v-if="article.content"
-          id="editor"
-          v-html="$md.render(article.content)"
+            v-if="article.attributes.content"
+            id="editor"
+            v-html="$md.render(article.attributes.content)"
         />
         <!-- eslint-enable vue/no-v-html -->
-        <p v-if="article.published_at">
-          {{ moment(article.published_at).format("MMM Do YY") }}
+        <p v-if="article.attributes.publishedAt">
+          {{ moment(article.attributes.publishedAt).format("MMM Do YY") }}
         </p>
       </div>
     </div>
@@ -29,17 +29,62 @@
 
 <script>
 import moment from "moment";
-import { getStrapiMedia } from "../../utils/medias";
-import { getMetaTags } from "../../utils/seo";
+import {getStrapiMedia} from "../../utils/medias";
+import {getMetaTags} from "../../utils/seo";
+import Qs from "qs";
 
 export default {
-  async asyncData({ $strapi, params }) {
-    const matchingArticles = await $strapi.find("articles", {
-      slug: params.slug,
-    });
+  async asyncData({$axios, params}) {
+    const qSlug = Qs.stringify(
+        {
+          filters: {
+            slug: params.slug,
+          },
+          populate: {
+            category: {
+              populate: "*",
+            },
+            image: {
+              populate: "*",
+            },
+            author: {
+              populate: "*",
+            },
+          },
+        },
+        {
+          encodeValuesOnly: true,
+        }
+    );
+
+    const qGlobal = Qs.stringify(
+        {
+          populate: {
+            defaultSeo: {
+              populate: "*",
+            },
+            favicon: {
+              populate: "*",
+            },
+          },
+        },
+        {
+          encodeValuesOnly: true,
+        }
+    );
+
+    let globalUrl = `http://localhost:1337/api/global?${qGlobal}`;
+    let articleSlugUrl = `http://localhost:1337/api/articles?${qSlug}`;
+
+    console.log("globalUrl", globalUrl);
+    console.log("articleSlugUrl", articleSlugUrl);
+
+    let articleSlugRes = await $axios.get(articleSlugUrl);
+    let globalRes = await $axios.get(globalUrl);
+
     return {
-      article: matchingArticles[0],
-      global: await $strapi.find("global"),
+      article: articleSlugRes.data.data[0],
+      global: globalRes.data.data,
     };
   },
   data() {
@@ -52,14 +97,14 @@ export default {
     getStrapiMedia,
   },
   head() {
-    const { defaultSeo, favicon, siteName } = this.global;
+    const {defaultSeo, favicon, siteName} = this.global.attributes;
 
     // Merge default and article-specific SEO data
     const fullSeo = {
       ...defaultSeo,
-      metaTitle: this.article.title,
-      metaDescription: this.article.description,
-      shareImage: this.article.image,
+      metaTitle: this.article.attributes.title,
+      metaDescription: this.article.attributes.description,
+      shareImage: this.article.attributes.image,
     };
 
     return {
@@ -69,7 +114,7 @@ export default {
       link: [
         {
           rel: "favicon",
-          href: getStrapiMedia(favicon.url),
+          href: getStrapiMedia(favicon.data.attributes.url),
         },
       ],
     };

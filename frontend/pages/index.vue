@@ -2,8 +2,8 @@
   <div>
     <div class="uk-section">
       <div class="uk-container uk-container-large">
-        <h1>{{ homepage.hero.title }}</h1>
-        <Articles :articles="articles" />
+        <h1>{{ homepage.attributes.hero.title }}</h1>
+        <Articles :articles="articles"/>
       </div>
     </div>
   </div>
@@ -15,38 +15,83 @@ import {getMetaTags} from "../utils/seo";
 import {getStrapiMedia} from "../utils/medias";
 import Qs from "qs";
 
-
 export default {
   components: {
     Articles,
   },
-  async asyncData({$strapi, $axios}) {
-    const query = Qs.stringify({
-      populate: {
-        author: {
-          populate: ["company"],
+  async asyncData({$axios}) {
+    const qHomepage = Qs.stringify(
+        {
+          populate: {
+            seo: {
+              populate: "*",
+            },
+            hero: {
+              populate: "*",
+            },
+          },
         },
-      },
-    }, {
-      encodeValuesOnly: true,
-    });
+        {
+          encodeValuesOnly: true,
+        }
+    );
 
+    const qArticles = Qs.stringify(
+        {
+          populate: {
+            category: {
+              populate: "*",
+            },
+            image: {
+              populate: "*",
+            },
+            author: {
+              populate: "*",
+            },
+          },
+        },
+        {
+          encodeValuesOnly: true,
+        }
+    );
 
-    let baseUrl = "http://localhost:1337/api";
+    const qGlobal = Qs.stringify(
+        {
+          populate: {
+            defaultSeo: {
+              populate: "*",
+            },
+            favicon: {
+              populate: "*",
+            },
+          },
+        },
+        {
+          encodeValuesOnly: true,
+        }
+    );
 
-    let articles = await $axios.get("http://localhost:1337/api/articles").data.data;
+    let homePageUrl = `http://localhost:1337/api/homepage?${qHomepage}`;
+    let articleUrl = `http://localhost:1337/api/articles?${qArticles}`;
+    let globalUrl = `http://localhost:1337/api/global?${qGlobal}`;
 
-    console.log("response : ", response.data);
+    console.log("homePageUrl", homePageUrl);
+    console.log("articleUrl", articleUrl);
+    console.log("globalUrl", globalUrl);
+
+    let articlesRes = await $axios.get(articleUrl);
+    let homepageRes = await $axios.get(homePageUrl);
+    let globalRes = await $axios.get(globalUrl);
 
     return {
-      articles: await $strapi.find("articles"),
-      homepage: await $strapi.find("homepage"),
-      global: await $strapi.find("global"),
+      articles: articlesRes.data.data,
+      homepage: homepageRes.data.data,
+      global: globalRes.data.data,
     };
   },
   head() {
-    const {seo} = this.homepage;
-    const {defaultSeo, favicon, siteName} = this.global;
+    const {seo} = this.homepage.attributes;
+    const {defaultSeo, favicon, siteName} = this.global.attributes;
 
     // Merge default and article-specific SEO data
     const fullSeo = {
@@ -61,7 +106,7 @@ export default {
       link: [
         {
           rel: "favicon",
-          href: getStrapiMedia(favicon.url),
+          href: getStrapiMedia(favicon.data.attributes.url),
         },
       ],
     };

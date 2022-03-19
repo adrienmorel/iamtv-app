@@ -3,8 +3,8 @@
     <client-only>
       <div class="uk-section">
         <div class="uk-container uk-container-large">
-          <h1>{{ category.name }}</h1>
-          <Articles :articles="articles || []" />
+          <h1>{{ category.attributes.name }}</h1>
+          <Articles :articles="articles || []"/>
         </div>
       </div>
     </client-only>
@@ -13,33 +13,71 @@
 
 <script>
 import Articles from "../../components/Articles";
-import { getMetaTags } from "../../utils/seo";
-import { getStrapiMedia } from "../../utils/medias";
+import {getMetaTags} from "../../utils/seo";
+import {getStrapiMedia} from "../../utils/medias";
+import Qs from "qs";
 
 export default {
   components: {
     Articles,
   },
-  async asyncData({ $strapi, params }) {
-    const matchingCategories = await $strapi.find("categories", {
-      slug: params.slug,
-    });
+  async asyncData({$axios, params}) {
+    const qCategorieSlug = Qs.stringify(
+        {
+          filters: {
+            slug: params.slug,
+          },
+          populate: [
+            "articles",
+            "articles.category",
+            "articles.image",
+            "articles.author",
+            "articles.author.picture",
+          ],
+        },
+        {
+          encodeValuesOnly: true,
+        }
+    );
+    const qGlobal = Qs.stringify(
+        {
+          populate: {
+            defaultSeo: {
+              populate: "*",
+            },
+            favicon: {
+              populate: "*",
+            },
+          },
+        },
+        {
+          encodeValuesOnly: true,
+        }
+    );
+
+    let globalUrl = `http://localhost:1337/api/global?${qGlobal}`;
+    let categorieSlugUrl = `http://localhost:1337/api/categories?${qCategorieSlug}`;
+
+    console.log("globalUrl", globalUrl);
+    console.log("categorieSlugUrl", categorieSlugUrl);
+
+    let globalRes = await $axios.get(globalUrl);
+    let categorieSlugRes = await $axios.get(categorieSlugUrl);
+
     return {
-      category: matchingCategories[0],
-      articles: await $strapi.find("articles", {
-        "category.name": params.slug,
-      }),
-      global: await $strapi.find("global"),
+      category: categorieSlugRes.data.data[0],
+      articles: categorieSlugRes.data.data[0].attributes.articles.data,
+      global: globalRes.data.data,
     };
   },
   head() {
-    const { defaultSeo, favicon, siteName } = this.global;
+    const {defaultSeo, favicon, siteName} = this.global.attributes;
 
     // Merge default and article-specific SEO data
     const fullSeo = {
       ...defaultSeo,
-      metaTitle: `${this.category.name} articles`,
-      metaDescription: `All articles about ${this.category.name}`,
+      metaTitle: `${this.category.attributes.name} articles`,
+      metaDescription: `All articles about ${this.category.attributes.name}`,
     };
 
     return {
@@ -49,7 +87,7 @@ export default {
       link: [
         {
           rel: "favicon",
-          href: getStrapiMedia(favicon.url),
+          href: getStrapiMedia(favicon.data.attributes.url),
         },
       ],
     };

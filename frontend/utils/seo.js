@@ -32,7 +32,7 @@ export function getMetaTags(seo) {
     );
   }
   if (seo.shareImage) {
-    const imageUrl = getStrapiMedia(seo.shareImage.url);
+    const imageUrl = getStrapiMedia(seo.shareImage.data.attributes.url);
     tags.push(
       {
         name: "image",
