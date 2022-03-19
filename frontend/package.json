@@ -8,7 +8,7 @@
     "dev": "nuxt",
     "develop": "nuxt",
     "start": "nuxt start",
-    "generate": "nuxt generate",
+    "build": "nuxt build",
     "lint": "eslint --ext .js,.vue .",
     "lint:fix": "eslint --ext .js,.vue . --fix"
   },

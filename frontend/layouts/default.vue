@@ -4,7 +4,7 @@
       <div class="uk-navbar-left">
         <ul class="uk-navbar-nav">
           <li>
-            <a href="#modal-full" uk-toggle><span uk-icon="icon: table"/></a>
+            <a href="#modal-full" uk-toggle><span uk-icon="icon: table" /></a>
           </li>
           <li>
             <nuxt-link to="/" tag="a">Strapi Blog</nuxt-link>
@@ -16,11 +16,11 @@
         <ul class="uk-navbar-nav">
           <li v-for="category in categories" :key="category.id">
             <nuxt-link
-                :to="{
+              :to="{
                 name: 'categories-slug',
                 params: { slug: category.attributes.slug },
               }"
-                tag="a"
+              tag="a"
             >
               {{ category.attributes.name }}
             </nuxt-link>
@@ -32,20 +32,20 @@
     <div id="modal-full" class="uk-modal-full" uk-modal>
       <div class="uk-modal-dialog">
         <button
-            class="uk-modal-close-full uk-close-large"
-            type="button"
-            uk-close
+          class="uk-modal-close-full uk-close-large"
+          type="button"
+          uk-close
         />
         <div
-            class="uk-grid-collapse uk-child-width-1-2@s uk-flex-middle"
-            uk-grid
+          class="uk-grid-collapse uk-child-width-1-2@s uk-flex-middle"
+          uk-grid
         >
           <div
-              class="uk-background-cover"
-              style="
+            class="uk-background-cover"
+            style="
               background-image: url('https://images.unsplash.com/photo-1493612276216-ee3925520721?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=3308&q=80 3308w');
             "
-              uk-height-viewport
+            uk-height-viewport
           />
           <div class="uk-padding-large">
             <h1 style="font-family: Staatliches">Strapi blog</h1>
@@ -53,12 +53,12 @@
               <ul class="uk-nav-primary uk-nav-parent-icon" uk-nav>
                 <li v-for="category in categories" :key="category.id">
                   <nuxt-link
-                      class="uk-modal-close"
-                      :to="{
+                    :to="{
                       name: 'categories-slug',
                       params: { slug: category.attributes.slug },
                     }"
-                      tag="a"
+                    class="uk-modal-close"
+                    tag="a"
                   >
                     {{ category.attributes.name }}
                   </nuxt-link>
@@ -70,17 +70,14 @@
         </div>
       </div>
     </div>
-    <nuxt/>
+    <nuxt />
   </div>
 </template>
 
 <script>
 export default {
   async fetch() {
-    let categoriesRes = await this.$axios.get(
-        "http://localhost:1337/api/categories"
-    );
-
+    let categoriesRes = await this.$api.categorie.all();
     this.categories = categoriesRes.data.data;
   },
   data: function () {
