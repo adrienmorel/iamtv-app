@@ -36,6 +36,7 @@ export default {
   },
   computed: {
     leftArticlesCount() {
+      // TODO : Faire moite-moite nn ?
       return Math.ceil(this.articles.length / 5);
     },
     leftArticles() {

@@ -3,13 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "develop:backend": "npm run --prefix backend develop",
-    "develop:frontend": "wait-on http://localhost:1337/admin && npm run --prefix frontend develop",
+    "develop:backend": "cd backend && yarn run develop",
+    "develop:frontend": "wait-on http://localhost:1337/admin && cd frontend && yarn run develop",
     "develop": "cross-env FORCE_COLOR=1 npm-run-all -l -p develop:*"
   },
   "devDependencies": {
     "cross-env": "7.0.3",
-    "npm-run-all": "4.1.5",
+    "npm-run-all": "^4.1.5",
     "wait-on": "5.2.1"
-  }
+  },
+  "dependencies": {}
 }
