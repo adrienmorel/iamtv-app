@@ -202,11 +202,10 @@ async function reUploadFile() {
     {
       fields: ['id', 'name'],
     })).map(entry => ({id: entry[0], name: entry[1]}));
-  console.log(`Entries found : ${entries}`);
+  console.log(`Entries found : ${entries.map(entry => JSON.stringify(entry))}`);
 
 
   for (const entry of entries) {
-
     const file = files.find((value) => value.startsWith(entry.name));
     if (file) {
       console.log(`Match found, between entry=${entry.name} and file=${file}`)
