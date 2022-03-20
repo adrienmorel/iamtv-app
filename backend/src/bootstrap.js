@@ -218,7 +218,7 @@ async function reUploadFile() {
         .plugin("upload")
         .service("upload")
         .replace(entry.id, {
-          files: fileData,
+          file: fileData,
           data: {
             fileInfo: {
               alternativeText: fileName,
