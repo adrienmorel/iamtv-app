@@ -201,11 +201,12 @@ async function reUploadFile() {
   const entries = (await strapi.entityService.findMany('plugin::upload.file',
     {
       fields: ['id', 'name'],
-    })).map(entry => ({id: entry[0], name: entry[1]}));
+    }));
+
   console.log(`Entries found : ${entries.map(entry => JSON.stringify(entry))}`);
 
-
   for (const entry of entries) {
+    console.log(`Search for entry=${JSON.stringify(entry)}`)
     const file = files.find((value) => value.startsWith(entry.name));
     if (file) {
       console.log(`Match found, between entry=${entry.name} and file=${file}`)
