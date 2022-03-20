@@ -245,15 +245,18 @@ module.exports = async () => {
       console.error(error);
     }
   } else {
-    // TODO : A retirer par la suite
-    // Pour le moment on copy/paste les fichiers de data/uploads dans publics/uploads
-    // Puisque on utilise Heroku, le serveur est regenéré completement mais
-    // la bdd postgres as deja la data (shouldImportSeedData=false) mais
-    // le serveur lui n'a plus les fichiers car c'est une nouvelle instance !
-    // on fait donc un copy/paste pour les remettre
-    // A note que si on upload un media sur l'environnement de prod,
-    // alors il n'y sera plus au prochain deploiement
-    // Resolution du prod = Passer sur AWS s3 !
-    await reUploadFile();
+    // Appliquer en production seulement
+    if (strapi.config.environment === "production") {
+      // TODO : A retirer par la suite
+      // Pour le moment on copy/paste les fichiers de data/uploads dans publics/uploads
+      // Puisque on utilise Heroku, le serveur est regenéré completement mais
+      // la bdd postgres as deja la data (shouldImportSeedData=false) mais
+      // le serveur lui n'a plus les fichiers car c'est une nouvelle instance !
+      // on fait donc un copy/paste pour les remettre
+      // A note que si on upload un media sur l'environnement de prod,
+      // alors il n'y sera plus au prochain deploiement
+      // Resolution du prod = Passer sur AWS s3 !
+      await reUploadFile();
+    }
   }
 };
