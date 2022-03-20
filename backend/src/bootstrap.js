@@ -18,8 +18,8 @@ async function isFirstRun() {
     type: "type",
     name: "setup",
   });
-  const initHasRun = await pluginStore.get({ key: "initHasRun" });
-  await pluginStore.set({ key: "initHasRun", value: true });
+  const initHasRun = await pluginStore.get({key: "initHasRun"});
+  await pluginStore.set({key: "initHasRun", value: true});
   return !initHasRun;
 }
 
@@ -73,7 +73,7 @@ function getFileData(fileName) {
 }
 
 // Create an entry and attach files if there are any
-async function createEntry({ model, entry, files }) {
+async function createEntry({model, entry, files}) {
   try {
     if (files) {
       for (const [key, file] of Object.entries(files)) {
@@ -114,7 +114,7 @@ async function createEntry({ model, entry, files }) {
 async function importCategories() {
   return Promise.all(
     categories.map((category) => {
-      return createEntry({ model: "category", entry: category });
+      return createEntry({model: "category", entry: category});
     })
   );
 }
@@ -123,7 +123,7 @@ async function importHomepage() {
   const files = {
     "seo.shareImage": getFileData("default-image.png"),
   };
-  await createEntry({ model: "homepage", entry: homepage, files });
+  await createEntry({model: "homepage", entry: homepage, files});
 }
 
 async function importWriters() {
@@ -166,7 +166,7 @@ async function importGlobal() {
     favicon: getFileData("favicon.png"),
     "defaultSeo.shareImage": getFileData("default-image.png"),
   };
-  return createEntry({ model: "global", entry: global, files });
+  return createEntry({model: "global", entry: global, files});
 }
 
 async function importSeedData() {
@@ -187,6 +187,51 @@ async function importSeedData() {
   await importGlobal();
 }
 
+/**
+ * Re-upload des fichiers en bdd dans le dossier public/upload
+ * avec la method replace du service "upload"
+ * @returns {Promise<void>}
+ */
+async function reUploadFile() {
+  console.log("Start reUploadFile method");
+
+  const files = fs.readdirSync("./data/uploads/");
+  console.log(`Files found : ${files}`);
+
+  const entries = await strapi.entityService.findMany('plugin::upload.file',
+    {
+      fields: ['id', 'name'],
+    });
+  console.log(`Entries found : ${entries}`);
+
+
+  for (const entry of entries) {
+    const file = files.find((value) => value.startsWith(entries.name));
+    if (file) {
+      console.log(`Match found, between entry=${entry.name} and file=${file}`)
+
+      const fileData = getFileData(file);
+      const [fileName] = fileData.name.split('.');
+
+      await strapi
+        .plugin("upload")
+        .service("upload")
+        .replace(entry.id, {
+          files: fileData,
+          data: {
+            fileInfo: {
+              alternativeText: fileName,
+              caption: fileName,
+              name: fileName,
+            },
+          },
+        });
+
+      console.log(`File=${entry} is replace by ${fileData}`);
+    }
+  }
+}
+
 module.exports = async () => {
   const shouldImportSeedData = await isFirstRun();
 
@@ -199,5 +244,16 @@ module.exports = async () => {
       console.log("Could not import seed data");
       console.error(error);
     }
+  } else {
+    // TODO : A retirer par la suite
+    // Pour le moment on copy/paste les fichiers de data/uploads dans publics/uploads
+    // Puisque on utilise Heroku, le serveur est regenéré completement mais
+    // la bdd postgres as deja la data (shouldImportSeedData=false) mais
+    // le serveur lui n'a plus les fichiers car c'est une nouvelle instance !
+    // on fait donc un copy/paste pour les remettre
+    // A note que si on upload un media sur l'environnement de prod,
+    // alors il n'y sera plus au prochain deploiement
+    // Resolution du prod = Passer sur AWS s3 !
+    await reUploadFile();
   }
 };
