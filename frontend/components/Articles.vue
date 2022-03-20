@@ -2,15 +2,17 @@
   <div>
     <div class="uk-child-width-1-2" uk-grid>
       <div>
-        <ArticleCard
-          v-for="article in leftArticles"
-          :key="article.id"
-          :article="article"
-        />
+        <div class="uk-child-width-1-1" uk-grid>
+          <ArticleCard4
+            v-for="article in leftArticles"
+            :key="article.id"
+            :article="article"
+          />
+        </div>
       </div>
       <div>
         <div class="uk-child-width-1-2@m uk-grid-match" uk-grid>
-          <ArticleCard
+          <ArticleCard4
             v-for="article in rightArticles"
             :key="article.id"
             :article="article"
@@ -22,11 +24,11 @@
 </template>
 
 <script>
-import ArticleCard from "./ArticleCard";
+import ArticleCard4 from "./ArticleCard4";
 
 export default {
   components: {
-    ArticleCard,
+    ArticleCard4,
   },
   props: {
     articles: {

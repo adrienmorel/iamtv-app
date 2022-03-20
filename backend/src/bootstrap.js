@@ -255,7 +255,7 @@ module.exports = async () => {
       // on fait donc un copy/paste pour les remettre
       // A note que si on upload un media sur l'environnement de prod,
       // alors il n'y sera plus au prochain deploiement
-      // Resolution du prod = Passer sur AWS s3 !
+      // Resolution du prob = Passer sur AWS s3 !
       await reUploadFile();
     }
   }

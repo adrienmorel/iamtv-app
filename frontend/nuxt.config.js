@@ -22,7 +22,7 @@ export default {
   css: [
     "uikit/dist/css/uikit.min.css",
     "uikit/dist/css/uikit.css",
-    "@assets/css/main.css",
+    { src: "~/assets/css/main.scss", lang: "sass" },
   ],
 
   plugins: [{ src: "~/plugins/uikit.js", ssr: false }, "~/plugins/api.js"],
